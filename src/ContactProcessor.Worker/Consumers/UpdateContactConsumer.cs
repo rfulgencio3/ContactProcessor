@@ -1,24 +1,28 @@
-﻿using ContactProcessor.Application.Models;
-using ContactProcessor.Application.Services;
+﻿using ContactProcessor.Application.Event;
 using ContactProcessor.Application.IntegrationModels;
+using ContactProcessor.Application.Services.Interfaces;
 using ContactProcessor.Core.Entities;
 using MassTransit;
 
 namespace ContactProcessor.Worker.Consumers;
 
-public class UpdateContactConsumer : IConsumer<UpdateContactModel>
+public class UpdateContactConsumer : IConsumer<UpdateContactEvent>
 {
-    private readonly ContactService _contactService;
+    private readonly IContactService _contactService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ILogger<UpdateContactConsumer> _logger;
 
-    public UpdateContactConsumer(ContactService contactService, IPublishEndpoint publishEndpoint)
+    public UpdateContactConsumer(IContactService contactService, IPublishEndpoint publishEndpoint, ILogger<UpdateContactConsumer> logger)
     {
         _contactService = contactService;
         _publishEndpoint = publishEndpoint;
+        _logger = logger;
     }
 
-    public async Task Consume(ConsumeContext<UpdateContactModel> context)
+    public async Task Consume(ConsumeContext<UpdateContactEvent> context)
     {
+        _logger.LogInformation("Received UpdateContact message at: {time}", DateTimeOffset.Now);
+
         var model = context.Message;
 
         var contact = new Contact
@@ -30,7 +34,7 @@ public class UpdateContactConsumer : IConsumer<UpdateContactModel>
             Status = model.Status
         };
 
-        await _contactService.HandleUpdateContactAsync(contact);
+        await _contactService.UpdateContactHandlerAsync(contact);
 
         var integrationMessage = new ContactIntegrationModel
         {
@@ -43,5 +47,6 @@ public class UpdateContactConsumer : IConsumer<UpdateContactModel>
         };
 
         await _publishEndpoint.Publish(integrationMessage);
+        _logger.LogInformation("Published integration message for UpdateContact at: {time}", DateTimeOffset.Now);
     }
 }

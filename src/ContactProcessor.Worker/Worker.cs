@@ -11,13 +11,13 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Worker execution started at: {time}", DateTimeOffset.Now);
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            }
-            await Task.Delay(1000, stoppingToken);
+            _logger.LogInformation("Worker running and waiting for messages at: {time}", DateTimeOffset.Now);
+            await Task.Delay(10000, stoppingToken); // Reduzindo a frequência para cada 10 segundos
         }
+        _logger.LogInformation("Worker execution stopped at: {time}", DateTimeOffset.Now);
     }
+
 }

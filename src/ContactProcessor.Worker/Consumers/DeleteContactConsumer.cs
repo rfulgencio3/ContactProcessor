@@ -1,26 +1,30 @@
-﻿using ContactProcessor.Application.Models;
-using ContactProcessor.Application.Services;
+﻿using ContactProcessor.Application.Event;
 using ContactProcessor.Application.IntegrationModels;
+using ContactProcessor.Application.Services.Interfaces;
 using MassTransit;
 
 namespace ContactProcessor.Worker.Consumers;
 
-public class DeleteContactConsumer : IConsumer<DeleteContactModel>
+public class DeleteContactConsumer : IConsumer<DeleteContactEvent>
 {
-    private readonly ContactService _contactService;
+    private readonly IContactService _contactService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ILogger<DeleteContactConsumer> _logger;
 
-    public DeleteContactConsumer(ContactService contactService, IPublishEndpoint publishEndpoint)
+    public DeleteContactConsumer(IContactService contactService, IPublishEndpoint publishEndpoint, ILogger<DeleteContactConsumer> logger)
     {
         _contactService = contactService;
         _publishEndpoint = publishEndpoint;
+        _logger = logger;
     }
 
-    public async Task Consume(ConsumeContext<DeleteContactModel> context)
+    public async Task Consume(ConsumeContext<DeleteContactEvent> context)
     {
+        _logger.LogInformation("Received DeleteContact message at: {time}", DateTimeOffset.Now);
+
         var model = context.Message;
 
-        await _contactService.HandleDeleteContactAsync(model.Id);
+        await _contactService.DeleteContactHandlerAsync(model.Id);
 
         var integrationMessage = new DeleteIntegrationModel
         {
@@ -29,5 +33,6 @@ public class DeleteContactConsumer : IConsumer<DeleteContactModel>
         };
 
         await _publishEndpoint.Publish(integrationMessage);
+        _logger.LogInformation("Published integration message for DeleteContact at: {time}", DateTimeOffset.Now);
     }
 }

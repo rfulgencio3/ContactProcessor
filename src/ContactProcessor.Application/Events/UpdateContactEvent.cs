@@ -1,7 +1,8 @@
-﻿namespace ContactProcessor.Application.Models
+﻿namespace ContactProcessor.Application.Event
 {
-    public class CreateContactModel
+    public class UpdateContactEvent
     {
+        public int Id { get; set; }
         public string DDD { get; set; }
         public string Number { get; set; }
         public string FullName { get; set; }

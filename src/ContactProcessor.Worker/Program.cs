@@ -1,6 +1,8 @@
 using ContactProcessor.Application.Services;
+using ContactProcessor.Application.Services.Interfaces;
 using ContactProcessor.Core.Interfaces;
 using ContactProcessor.Infrastructure.Data;
+using ContactProcessor.Worker;
 using ContactProcessor.Worker.Consumers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +14,7 @@ var host = Host.CreateDefaultBuilder(args)
             options.UseNpgsql(context.Configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IContactRepository, ContactRepository>();
-        services.AddScoped<ContactService>();
+        services.AddScoped<IContactService, ContactService>();
 
         services.AddMassTransit(x =>
         {
@@ -20,28 +22,35 @@ var host = Host.CreateDefaultBuilder(args)
             x.AddConsumer<UpdateContactConsumer>();
             x.AddConsumer<DeleteContactConsumer>();
 
-            x.UsingRabbitMq((context, config) =>
+            x.UsingRabbitMq((context, cfg) =>
             {
-                config.Host("localhost", "/", h => { });
-
-                config.ReceiveEndpoint("contact.create", e =>
+                cfg.Host("localhost", "/", h => { });
+                cfg.UseDelayedMessageScheduler();
+                cfg.ReceiveEndpoint("contact.create", e =>
                 {
                     e.ConfigureConsumer<CreateContactConsumer>(context);
                 });
 
-                config.ReceiveEndpoint("contact.update", e =>
+                cfg.ReceiveEndpoint("contact.update", e =>
                 {
                     e.ConfigureConsumer<UpdateContactConsumer>(context);
                 });
 
-                config.ReceiveEndpoint("contact.delete", e =>
+                cfg.ReceiveEndpoint("contact.delete", e =>
                 {
                     e.ConfigureConsumer<DeleteContactConsumer>(context);
                 });
             });
         });
 
-        services.AddMassTransitHostedService();
+        services.AddMassTransitHostedService(true);
+
+        services.AddHostedService<Worker>();
+    })
+    .ConfigureLogging(logging =>
+    {
+        logging.ClearProviders();
+        logging.AddConsole();
     })
     .Build();
 
