@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-ContactProcessor.Worker-2e8cc80c-ced9-4a53-b357-0cc49f7de385</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.2.4" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-preview.6.24327.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ContactProcessor.Application\ContactProcessor.Application.csproj" />
+    <ProjectReference Include="..\ContactProcessor.Core\ContactProcessor.Core.csproj" />
+    <ProjectReference Include="..\ContactProcessor.Infrastructure\ContactProcessor.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
