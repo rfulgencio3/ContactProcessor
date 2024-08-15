@@ -15,9 +15,9 @@ public class Worker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation("Worker running and waiting for messages at: {time}", DateTimeOffset.Now);
-            await Task.Delay(10000, stoppingToken); // Reduzindo a frequência para cada 10 segundos
+            await Task.Delay(10000, stoppingToken); 
         }
-        _logger.LogInformation("Worker execution stopped at: {time}", DateTimeOffset.Now);
+        _logger.LogInformation("Worker execution stopped at: {time}", DateTimeOffset.UtcNow);
     }
 
 }

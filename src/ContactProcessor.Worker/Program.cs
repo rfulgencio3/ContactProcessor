@@ -6,6 +6,7 @@ using ContactProcessor.Worker;
 using ContactProcessor.Worker.Consumers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -24,8 +25,10 @@ var host = Host.CreateDefaultBuilder(args)
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("localhost", "/", h => { });
-                cfg.UseDelayedMessageScheduler();
+                cfg.Host("localhost", "/", host => { });
+
+                cfg.UseRawJsonSerializer();
+
                 cfg.ReceiveEndpoint("contact.create", e =>
                 {
                     e.ConfigureConsumer<CreateContactConsumer>(context);
