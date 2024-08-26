@@ -6,7 +6,6 @@ using ContactProcessor.Worker;
 using ContactProcessor.Worker.Consumers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
